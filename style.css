@@ -42,8 +42,22 @@ h2 {
   text-align: center;
 }
 
-.chart,#demoController {
+#demoController {
   margin: 2em auto;
+}
+
+.chart {
+  position: relative;
+  width: 100%;
+  /* Set a fixed height for mobile */
+  height: 300px;
+}
+
+@media (min-width: 768px) {
+  .chart {
+    /* Larger height for desktop */
+    height: 500px;
+  }
 }
 
 .play-btn {
