@@ -1,0 +1,118 @@
+#main {
+  margin: 0 auto;
+  width: 60em;
+}
+
+
+
+body {
+  font-family: sans-serif;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2em;
+}
+
+h2 {
+  font-size: 1.8em;
+}
+
+#adsrPicture {
+  display: block;
+  max-width: 60%;
+  margin: 2em auto;
+  border: 1px solid black;
+}
+
+.buttonPanel {
+  text-align: center;
+}
+
+.chart,#demoController {
+  margin: 2em auto;
+}
+
+.play-btn {
+  width: 60px;
+  height: 60px;
+  background-color: #333;
+  border: none;
+  border-radius: 50%; /* Makes the button circular */
+  cursor: pointer;
+  display: flex;
+  margin: 1em auto;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.play-btn:hover {
+  background-color: #555;
+}
+
+/* 1. Base Icon (Play Triangle) */
+ .play-icon {
+   width: 0;
+   height: 0;
+   border-top: 15px solid transparent;
+   border-bottom: 15px solid transparent;
+   border-left: 25px solid white;
+   margin-left: 5px; /* Visual center for triangle */
+   position: relative;
+   transition: all 0.2s ease;
+ }
+
+ /* 2. When 'playing' class is added to the BUTTON */
+ .playing .play-icon {
+   width: 25px;       /* Match total width of play triangle */
+   height: 30px;      /* Match total height of play triangle */
+   border: none;      /* Remove the triangle borders */
+   margin-left: 0;    /* Reset the nudge */
+ }
+
+ /* 3. Create the two Pause Bars */
+ .playing .play-icon::before,
+ .playing .play-icon::after {
+   content: "";
+   position: absolute;
+   top: 0;
+   width: 8px;        /* Width of each bar */
+   height: 100%;
+   background-color: white;
+ }
+
+.playing .play-icon::before { left: 0; }  /* Left bar */
+.playing .play-icon::after  { right: 0; } /* Right bar */
+
+.code-block {
+    /* Initialize the counter */
+    counter-reset: line-numbers;
+    background: #f4f4f4;
+    padding: 10px;
+    font-family: monospace;
+    display: flex;
+    flex-direction: column;
+}
+
+.code-block span {
+    display: block; /* Ensure each span is on its own line */
+}
+
+.code-block span::before {
+    /* Increment and display the counter */
+    counter-increment: line-numbers;
+    content: counter(line-numbers);
+
+    /* Styling the line numbers */
+    display: inline-block;
+    width: 2em; /* Fixed width for alignment */
+    margin-right: 1em;
+    padding-right: 0.5em;
+    color: #888;
+    border-right: 1px solid #ccc;
+    text-align: right;
+
+    /* Prevent line numbers from being selected during copy/paste */
+    user-select: none;
+}

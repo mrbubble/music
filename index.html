@@ -6,10 +6,11 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
-
+  <div id="main">
 
   <h1>The Konami Software Envelope</h1>
 
@@ -32,43 +33,50 @@
     <li>Release: shortly before the end of the note, the volume is again reduced at a rate of one level per tick.</li>
   </ul>
 
-  The exact amount of time taken by each phase could vary depending on the game.
+  <p>The exact amount of time taken by each phase could vary depending on the game.
 
-  The graph below illustrates a typical envelope pattern in notes from the game Knightmare. Press the play to hear an A4 note using that envelope.
+  <p>The graph below illustrates a typical envelope pattern in notes from the game Knightmare. Press play to hear an A4 note using that envelope.
 
   <div class="chart">
     <canvas id="envelopeChart"></canvas>
-    <button id="play">Play</button>
+    <div class="buttonPanel">
+      <button id="play" class="play-btn"><span class="play-icon"></span></button>
+    </div>
   </div>
 
   The following Javascript code snippet provides a generic envelope generator parameterized to allow generating the envelope patterns of most Konami game sounds.
 
-  <div class="codeSnippet">
-  <pre>
-  function* konamiEnvelope(volume, decayRate, sustainVolume, totalDurationTicks, noteOnDurationTicks) {
-    for (ticks = 0; ticks < totalDurationTicks; ticks++) {
-      yield Math.round(volume);
-      if (volume > 0 && (volume > sustainVolume || ticks >= noteOnDurationTicks)) {
-        volume -= decayRate;
-      }
-    }
-  }
+  <div>
+  <pre class="code-block">
+    <span>function* konamiEnvelope(volume, decayRate, sustainVolume, totalDurationTicks, noteOnDurationTicks) {</span>
+    <span>  for (ticks = 0; ticks < totalDurationTicks; ticks++) {</span>
+    <span>    yield Math.round(volume);</span>
+    <span>    if (volume > 0 && (volume > sustainVolume || ticks >= noteOnDurationTicks)) {</span>
+    <span>      volume -= decayRate;</span>
+    <span>    }</span>
+    <span>  }</span>
+    <span>}</span>
   </pre>
   </div>
 
   <h2>Demo</h2>
 
-  Below you can see the difference in sound when using the Konami envelope. This is the Knightmare intro song. Select the envelope pattern and press Play.
+  Below you can see the difference in sound when using the Konami envelope. This is the Knightmare intro song. Select the envelope pattern and press play.
 
-  <div id="demoController">
-    <label for="instrumentSelect">Select envelope</label>
+  <div id="demoController" class="buttonPanel">
+
+    <label for="instrumentSelect">Select envelope:</label>
     <select name="instrument" id="instrumentSelect">
       <option value="konami" selected>Konami envelope</option>
       <option value="square">Plain square wave (no envelope)</option>
     </select>
-    <button id="playKnightmare">Play</button>
+    <div>
+    <button id="playKnightmare" class="play-btn"><span class="play-icon"></span></button>
+    </div>
+
   </div>
 
   <script src="demo.js"></script>
+  </div>
   </body>
 </html>

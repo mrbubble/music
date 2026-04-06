@@ -272,7 +272,17 @@ function play() {
   player.start();
 }
 
+let playing = false;
+
 function playKnightmare() {
+  player.reset();
+  playing = !playing;
+  if (playing) {
+    btn2.classList.add('playing');
+  } else {
+    btn2.classList.remove('playing');
+    return;
+  }
   const selector = document.getElementById('instrumentSelect');
   let instrument = undefined;
   switch(selector.value) {
@@ -283,7 +293,7 @@ function playKnightmare() {
       instrument = square;
       break;
   }
-  player.reset();
+
   channelA = player.channels[0];
   channelB = player.channels[1];
   channelC = player.channels[2];
