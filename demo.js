@@ -253,19 +253,118 @@ function parseNotes(str) {
 
 const player = new Player();
 const piano = new KnightmarePiano();
+const square = new SquareSynth();
 
 const btn = document.getElementById('play');
 btn.addEventListener('click', ev => {
   play();
 });
 
+const btn2 = document.getElementById('playKnightmare');
+btn2.addEventListener('click', ev => {
+  playKnightmare();
+});
+
 function play() {
+  player.reset();
+  channelA = player.channels[0];
+  addNotes(parseNotes('t225 v11 l4 o4 a'), piano, channelA);
+  player.start();
+}
+
+function playKnightmare() {
+  const selector = document.getElementById('instrumentSelect');
+  let instrument = undefined;
+  switch(selector.value) {
+    case 'konami':
+      instrument = piano;
+      break;
+    default:
+      instrument = square;
+      break;
+  }
   player.reset();
   channelA = player.channels[0];
   channelB = player.channels[1];
   channelC = player.channels[2];
-  addNotes(parseNotes('t225 v11 l8 o5 e r < a > e2&8 c# c# < b a > e e < a > e4. < a4  b4 > c#4 e r e   a4. g4.   d d d e1'), piano, channelA);
-  addNotes(parseNotes('t225 v11 l8 o4 a r   e   a2&8 e  e4.        a a   e   a4.   c#4 e4   a4  a r a > e4. c4. < a a a g#1'), piano, channelB);
-  addNotes(parseNotes('t225 v12 l8 o2 a4  > e a e a < a4 > e a e a < g4 > e a e a < g4 > e a e a < f4 > c f c f < f4 > c f c f < e1'), piano, channelC);
+  addNotes(parseNotes('t225 v11 l8 o5 e r < a > e2&8 c# c# < b a > e e < a > e4. < a4  b4 > c#4 e r e   a4. g4.   d d d e1'), instrument, channelA);
+  addNotes(parseNotes('t225 v11 l8 o4 a r   e   a2&8 e  e4.        a a   e   a4.   c#4 e4   a4  a r a > e4. c4. < a a a g#1'), instrument, channelB);
+  addNotes(parseNotes('t225 v12 l8 o2 a4  > e a e a < a4 > e a e a < g4 > e a e a < g4 > e a e a < f4 > c f c f < f4 > c f c f < e1'), instrument, channelC);
   player.start();
 }
+
+function drawEnvelope() {
+  const ctx = document.getElementById('envelopeChart').getContext('2d');
+  const labels = []
+  const dataPoints = []
+  let t = 0;
+  for (let vol of konamiEnvelope(11, 1, 9, 16, 12)) {
+     labels.push(t);
+     dataPoints.push(vol);
+     t++;
+  }
+  labels.push(t);
+  dataPoints.push(0);
+  new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: labels,
+          datasets: [{
+              label: 'envelope',
+              data: dataPoints,
+              borderColor: 'rgba(255, 99, 132, 1)',
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderWidth: 2,
+              // This creates the "jumping" effect
+              stepped: true,
+              fill: true
+          }]
+      },
+      options: {
+          plugins: {
+            title: {
+              display: true,
+              text: 'Konami Envelope',
+              color: '#333',
+              font: {
+                size: 24,
+                weight: 'bold'
+              }
+            },
+          },
+          scales: {
+              y: {
+                  beginAtZero: true,
+                  ticks: {
+                      // Forces the Y-axis to show only integers
+                      precision: 0,
+                      stepSize: 1
+                  },
+                  max: 15,
+                  title: {
+                    display: true,
+                    text: 'Volume',
+                    color: '#333',
+                    font: {
+                      size: 16,
+                      weight: 'bold'
+                    }
+                  },
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Time in ticks (1/60th of a second)',
+                  color: '#333',
+                  font: {
+                    size: 16,
+                    weight: 'bold'
+                  }
+                },
+              }
+          }
+      }
+  });
+}
+
+drawEnvelope();
