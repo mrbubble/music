@@ -1,6 +1,7 @@
 #main {
   margin: 0 auto;
-  width: 60em;
+  max-width: 60em;
+  width: 90%;
 }
 
 
@@ -9,9 +10,15 @@ body {
   font-family: sans-serif;
 }
 
+
 h1 {
   text-align: center;
-  font-size: 2em;
+   font-size: 1.5rem; /* Slightly smaller for mobile */
+}
+
+@media (min-width: 768px) {
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; }
 }
 
 h2 {
@@ -20,9 +27,15 @@ h2 {
 
 #adsrPicture {
   display: block;
-  max-width: 60%;
+  max-width: 90%;
   margin: 2em auto;
   border: 1px solid black;
+}
+
+@media (min-width: 768px) {
+  #adsrPicture {
+    max-width: 60%;
+  }
 }
 
 .buttonPanel {
@@ -34,8 +47,8 @@ h2 {
 }
 
 .play-btn {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   background-color: #333;
   border: none;
   border-radius: 50%; /* Makes the button circular */
@@ -93,6 +106,9 @@ h2 {
     font-family: monospace;
     display: flex;
     flex-direction: column;
+    overflow-x: auto;       /* Adds a scrollbar ONLY to the code block if it's too wide */
+    white-space: pre;       /* Keeps the code formatting intact */
+    word-wrap: normal;
 }
 
 .code-block span {
