@@ -71,14 +71,11 @@ const notesTable = {
   "G": 7,
 }
 class Note {
-  constructor(opt) {
-    const name = (opt.name || "A").toUpperCase();
-    const alter = opt.alter || 0;
-    const octave = opt.octave || 4;
-    const noteIndex = (notesTable[name] + alter) + 12 * (octave + 1);
+  constructor({name="A", alter=0, octave=4, volume=0, durationTicks=8}) {
+    const noteIndex = (notesTable[name.toUpperCase()] + alter) + 12 * (octave + 1);
     this.frequency = 440 * 2 ** ((noteIndex - 69) / 12);
-    this.volume = opt.volume || 0;
-    this.durationTicks = opt.durationTicks || 8;
+    this.volume = volume;
+    this.durationTicks = durationTicks;
   }
 }
 
