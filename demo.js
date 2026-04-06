@@ -1,43 +1,4 @@
-const ctx = new AudioContext();
 
-const btn = document.getElementById('play');
-btn.addEventListener('click', ev => {
-  play();
-});
-
-function play() {
-  player = new Player();
-  channelA = player.createChannel();
-  channelB = player.createChannel();
-  channelC = player.createChannel();
-  piano = new KnightmarePiano();
-  eng = new PlayEngine();
-  eng.setTempo(225);
-  eng.setOctave(5);
-  eng.setLength(8);
-  eng.setVolume(11);
-  eng.addNote({name: 'E'});
-  eng.addRest();
-  eng.setOctave(4);
-  eng.addNote({name: 'A'});
-  eng.setOctave(5);
-  eng.addNote({name: 'E', length: [2, 8]});
-  console.log(eng.notes);
-  addNotes(eng.notes, piano, channelA);
-
-//  piano.playNoteAt(channelA, new Note({name: "E", octave: 5, volume: 11, durationTicks: 8}), 0);
-//  piano.playNoteAt(channelA, new Note({name: "A", octave: 4, volume: 11, durationTicks: 8}), 16);
-//  piano.playNoteAt(channelA, new Note({name: "E", octave: 5, volume: 11, durationTicks: 40}), 24);
-  piano.playNoteAt(channelB, new Note({name: "A", octave: 4, volume: 11, durationTicks: 8}), 0);
-  piano.playNoteAt(channelB, new Note({name: "E", octave: 4, volume: 11, durationTicks: 8}), 16);
-  piano.playNoteAt(channelB, new Note({name: "A", octave: 4, volume: 11, durationTicks: 40}), 24);
-  piano.playNoteAt(channelC, new Note({name: "A", octave: 2, volume: 12, durationTicks: 16}), 0);
-  piano.playNoteAt(channelC, new Note({name: "E", octave: 3, volume: 12, durationTicks: 8}), 16);
-  piano.playNoteAt(channelC, new Note({name: "A", octave: 3, volume: 12, durationTicks: 8}), 24);
-  piano.playNoteAt(channelC, new Note({name: "E", octave: 3, volume: 12, durationTicks: 8}), 32);
-  piano.playNoteAt(channelC, new Note({name: "A", octave: 3, volume: 12, durationTicks: 8}), 40);
-  player.start();
-}
 
 function addNotes(notes, instrument, channel) {
   let pos = 0;
@@ -47,10 +8,20 @@ function addNotes(notes, instrument, channel) {
   }
 }
 
-
 class Player {
   constructor() {
+    this.init();
+  }
+
+  reset() {
+    this.ctx.close();
+    this.init();
+  }
+
+  init() {
     this.ctx = new AudioContext();
+    this.ctx.suspend();
+    this.channels = [this.createChannel(), this.createChannel(), this.createChannel()]
   }
 
   start() {
@@ -187,4 +158,119 @@ class PlayEngine {
     }
     return 14400 / (this.tempo * length);
   }
+}
+
+class PlayTokenizer {
+  constructor(str) {
+    this.str = str.replace(/\s/g, "").toUpperCase();
+  }
+  consumeChar() {
+    let c = this.str.charAt(0);
+    this.str = this.str.substring(1);
+    return c;
+  }
+  consumeNumber() {
+    let value = 0;
+    while (/\d/.test(this.str.charAt(0))) {
+      value = value * 10 + parseInt(this.consumeChar());
+    }
+    return value;
+  }
+  consumeAlter() {
+    if (/[+#]/.test(this.str.charAt(0))) {
+      this.consumeChar();
+      return 1;
+    }
+    if (this.str.charAt(0) == '-') {
+      this.consumeChar();
+      return -1;
+    }
+    return 0;
+  }
+  consumeLength() {
+    if (!/\d/.test(this.str.charAt(0))) {
+      return undefined;
+    }
+    let values = [this.consumeNumber()];
+    while (this.str.charAt(0) == '.') {
+      this.consumeChar();
+      values.push(values[values.length - 1] * 2);
+    }
+    if (this.str.charAt(0) == '&') {
+      this.consumeChar();
+      if (!/\d/.test(this.str.charAt(0))) {
+        throw new Error("Expected number after '&'");
+      }
+      values.push(...this.consumeLength());
+    }
+    return values;
+  }
+  done() {
+    return this.str.length === 0;
+  }
+}
+
+function parseNotes(str) {
+  const tok = new PlayTokenizer(str);
+  const eng = new PlayEngine();
+
+  while (!tok.done()) {
+    let cmd = tok.consumeChar();
+    switch(cmd) {
+      case 'T':
+        eng.setTempo(tok.consumeNumber());
+        break;
+      case 'V':
+        eng.setVolume(tok.consumeNumber());
+        break;
+      case 'O':
+        eng.setOctave(tok.consumeNumber());
+        break;
+      case 'L':
+        eng.setLength(tok.consumeNumber());
+        break;
+      case '>':
+        eng.setOctave(eng.octave + 1);
+        break;
+      case '<':
+        eng.setOctave(eng.octave - 1);
+        break;
+      case 'A':
+      case 'B':
+      case 'C':
+      case 'D':
+      case 'E':
+      case 'F':
+      case 'G':
+        let alter = tok.consumeAlter();
+        let length = tok.consumeLength();
+        eng.addNote({name: cmd, alter: alter, length: length});
+        break;
+      case 'R':
+        eng.addRest(tok.consumeLength());
+        break;
+      default:
+        throw new Error(`Invalid command: ${cmd}`);
+    }
+  }
+  return eng.notes;
+}
+
+const player = new Player();
+const piano = new KnightmarePiano();
+
+const btn = document.getElementById('play');
+btn.addEventListener('click', ev => {
+  play();
+});
+
+function play() {
+  player.reset();
+  channelA = player.channels[0];
+  channelB = player.channels[1];
+  channelC = player.channels[2];
+  addNotes(parseNotes('t225 v11 l8 o5 e r < a > e2&8 c# c# < b a > e e < a > e4. < a4  b4 > c#4 e r e   a4. g4.   d d d e1'), piano, channelA);
+  addNotes(parseNotes('t225 v11 l8 o4 a r   e   a2&8 e  e4.        a a   e   a4.   c#4 e4   a4  a r a > e4. c4. < a a a g#1'), piano, channelB);
+  addNotes(parseNotes('t225 v12 l8 o2 a4  > e a e a < a4 > e a e a < g4 > e a e a < g4 > e a e a < f4 > c f c f < f4 > c f c f < e1'), piano, channelC);
+  player.start();
 }
