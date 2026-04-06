@@ -1,5 +1,3 @@
-
-
 function addNotes(notes, instrument, channel) {
   let pos = 0;
   for (note of notes) {
@@ -87,7 +85,6 @@ class SquareSynth {
       const time = timeTicks / 60;
       channel.setFrequencyAt(note.frequency, time);
       channel.setVolumeAt(note.volume, time);
-      channel.setVolumeAt(0, time + (note.durationTicks / 60));
    }
 }
 
@@ -108,14 +105,13 @@ class KnightmarePiano {
       channel.setVolumeAt(vol, t);
       t += this.tick;
     }
-    channel.setVolumeAt(0, t);
   }
 }
 
 function* konamiEnvelope(volume, decayRate, sustainVolume, totalDurationTicks, noteOnDurationTicks) {
   for (ticks = 0; ticks < totalDurationTicks; ticks++) {
     yield Math.round(volume);
-    if (volume > sustainVolume || ticks >= noteOnDurationTicks) {
+    if (volume > 0 && (volume > sustainVolume || ticks >= noteOnDurationTicks)) {
       volume -= decayRate;
     }
   }
@@ -250,6 +246,8 @@ function parseNotes(str) {
         throw new Error(`Invalid command: ${cmd}`);
     }
   }
+  // Add a rest in the end to drop the volume
+  eng.addRest(4);
   return eng.notes;
 }
 
