@@ -11,9 +11,23 @@ function play() {
   channelB = player.createChannel();
   channelC = player.createChannel();
   piano = new KnightmarePiano();
-  piano.playNoteAt(channelA, new Note({name: "E", octave: 5, volume: 11, durationTicks: 8}), 0);
-  piano.playNoteAt(channelA, new Note({name: "A", octave: 4, volume: 11, durationTicks: 8}), 16);
-  piano.playNoteAt(channelA, new Note({name: "E", octave: 5, volume: 11, durationTicks: 40}), 24);
+  eng = new PlayEngine();
+  eng.setTempo(225);
+  eng.setOctave(5);
+  eng.setLength(8);
+  eng.setVolume(11);
+  eng.addNote({name: 'E'});
+  eng.addRest();
+  eng.setOctave(4);
+  eng.addNote({name: 'A'});
+  eng.setOctave(5);
+  eng.addNote({name: 'E', length: [2, 8]});
+  console.log(eng.notes);
+  addNotes(eng.notes, piano, channelA);
+
+//  piano.playNoteAt(channelA, new Note({name: "E", octave: 5, volume: 11, durationTicks: 8}), 0);
+//  piano.playNoteAt(channelA, new Note({name: "A", octave: 4, volume: 11, durationTicks: 8}), 16);
+//  piano.playNoteAt(channelA, new Note({name: "E", octave: 5, volume: 11, durationTicks: 40}), 24);
   piano.playNoteAt(channelB, new Note({name: "A", octave: 4, volume: 11, durationTicks: 8}), 0);
   piano.playNoteAt(channelB, new Note({name: "E", octave: 4, volume: 11, durationTicks: 8}), 16);
   piano.playNoteAt(channelB, new Note({name: "A", octave: 4, volume: 11, durationTicks: 40}), 24);
@@ -25,6 +39,13 @@ function play() {
   player.start();
 }
 
+function addNotes(notes, instrument, channel) {
+  let pos = 0;
+  for (note of notes) {
+    instrument.playNoteAt(channel, note, pos);
+    pos += note.durationTicks;
+  }
+}
 
 
 class Player {
@@ -85,7 +106,7 @@ class Note {
     const octave = opt.octave || 4;
     const noteIndex = (notesTable[name] + alter) + 12 * (octave + 1);
     this.frequency = 440 * 2 ** ((noteIndex - 69) / 12);
-    this.volume = opt.volume || 12;
+    this.volume = opt.volume || 0;
     this.durationTicks = opt.durationTicks || 8;
   }
 }
@@ -129,5 +150,41 @@ function* konamiEnvelope(volume, decayRate, sustainVolume, totalDurationTicks, n
     if (volume > sustainVolume || ticks >= noteOnDurationTicks) {
       volume -= decayRate;
     }
+  }
+}
+
+class PlayEngine {
+  constructor() {
+    this.notes = [];
+    this.octave = 4;
+    this.tempo = 150;
+    this.length = 4;
+    this.volume = 10;
+  }
+
+  setTempo(value) {
+    this.tempo = value;
+  }
+  setVolume(value) {
+    this.volume = value;
+  }
+  setLength(value) {
+    this.length = value;
+  }
+  setOctave(value) {
+    this.octave = value;
+  }
+  addNote({name = 'A', alter = 0, length = this.length}) {
+    this.notes.push(new Note({name: name, alter:alter, octave: this.octave, volume: this.volume, durationTicks: this.lengthToTicks(length)}));
+  }
+  addRest(length = this.length) {
+    this.notes.push(new Note({volume: 0, durationTicks: this.lengthToTicks(length)}));
+  }
+
+  lengthToTicks(length) {
+    if (Array.isArray(length)) {
+      return length.map(it => this.lengthToTicks(it)).reduce((acc, it) => acc + it, 0);
+    }
+    return 14400 / (this.tempo * length);
   }
 }
